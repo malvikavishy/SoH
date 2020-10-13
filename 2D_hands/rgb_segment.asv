@@ -1,0 +1,18 @@
+clear;
+
+image = imread("back3.jpg");
+r = image(:,:,1);
+g = image(:,:,2);
+b = image(:,:,3);
+
+
+
+levelr = 0.05;
+levelg = 0.1;
+levelb = 0.2;
+i1 = im2bw(r,levelr);
+i2 = im2bw(g,levelg);
+i3 = im2bw(b,levelb);
+isum = (i1&i2&i3);
+
+subplot(2,2,1),imshow(i1);
