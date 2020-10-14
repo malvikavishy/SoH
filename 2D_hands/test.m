@@ -1,6 +1,6 @@
 clear 
 
-image = imread("back3.jpg");
+image = imread('back3.jpg');
 %red = image(:,:,1);
 green = image(:,:,2);
 % blue = image(:,:,3);
@@ -20,5 +20,6 @@ J = imnoise(gray,'gaussian');
 imshow(J);
 figure;
 J = wiener2(J,[7,7]);
-J = im2bw(J,0.1);
+J = image_denoise_gray_3x3(J);
+J = im2bw(J,0.095);
 imshow(J);
