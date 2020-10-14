@@ -8,9 +8,17 @@ green = image(:,:,2);
 %imshow(image);
 figure;
 gray = rgb2gray(image);
-gray = imbinarize(gray);
-imshow(gray);
+grey = imbinarize(gray);
+imshow(grey);
  figure;
  imagesc(green);
+ 
+ %%
+ %Gaussian whiten noise
+ figure;
+J = imnoise(gray,'gaussian');
+imshow(J);
 figure;
-Z = peaks +10;
+J = wiener2(J,[7,7]);
+J = im2bw(J,0.1);
+imshow(J);
