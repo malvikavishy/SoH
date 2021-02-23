@@ -73,6 +73,7 @@ imshow(image_bin);
 filename_bin = strcat(name, ".png");
 imwrite(image_bin,filename_bin);
 
+
 % figure(4);
 % surf(y);
 % xlabel("x");
