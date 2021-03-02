@@ -42,7 +42,7 @@ with mp_hands.Hands(
     p3 = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_IP].x * image_width
     p4 = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].x * image_width
     p5 = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_MCP].x * image_width
-    p7 = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_PIP].x * image_width
+    p6 = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_PIP].x * image_width
     p7 = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_DIP].x * image_width
     p8 = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].x * image_width
     p9 = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_MCP].x * image_width
