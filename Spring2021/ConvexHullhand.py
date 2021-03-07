@@ -4,6 +4,15 @@ import cv2 as cv
 import sys
 def main():
 
+    # importing practice
+    #img_path = "hand.jpg"
+    #print(img_path)
+    #img = io.imread(img_path)
+    #print(img)
+    #cv.imshow('palm image', img)
+
+
+
     img_path = r"Spring2021\hand_4.png"
     img = cv.imread(img_path)
     #print(img_path)
