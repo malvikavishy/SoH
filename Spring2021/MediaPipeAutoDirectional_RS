@@ -1,0 +1,271 @@
+#This program should reposition any entered picture to face right, thumb down. It also calculates y positioning (remember, negative axis) and has some new definitions
+# There may be some extra/commented code I forgot to delete
+# Didn't test all images, probably won't work as well for less accurate joints
+import cv2
+import mediapipe as mp
+from matplotlib import pyplot as plt
+from PIL import Image
+import numpy as np
+import matplotlib.image as mpimg
+
+img = cv2.imread('Documents/hand_4.png')
+
+#rotated     = colorImage.rotate(45)
+
+imgplot = plt.imshow(img)
+
+mp_hands = mp.solutions.hands
+
+mp_drawing = mp.solutions.drawing_utils
+
+hands = mp_hands.Hands(static_image_mode=True,
+                      max_num_hands=2,
+                      min_detection_confidence=0.7)
+
+image = cv2.flip(img,1)
+
+image_hight, image_width, _ = image.shape
+
+results = hands.process(cv2.cvtColor(image,cv2.COLOR_BGR2RGB))
+
+print('Handedness: ', results.multi_handedness)
+
+annoted_image = image.copy()
+for hand_landmarks in results.multi_hand_landmarks:
+    mp_drawing.draw_landmarks(annoted_image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+#imageshow = plt.imshow(cv2.cvtColor(annoted_image,cv2.COLOR_BGR2RGB))
+#cv2.imshow("Image",cv2.flip(annoted_image,1))
+#cv2.waitKey(0)
+#cv2.destroyAllWindows()
+
+p0 = hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].x * image_width
+p1 = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_CMC].x * image_width
+p2 = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_MCP].x * image_width
+p3 = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_IP].x * image_width
+p4 = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].x * image_width
+p5 = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_MCP].x * image_width
+p6 = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_PIP].x * image_width
+p7 = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_DIP].x * image_width
+p8 = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].x * image_width
+p9 = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_MCP].x * image_width
+p10 = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_PIP].x * image_width
+p11 = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_DIP].x * image_width
+p12 = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP].x * image_width
+p13 = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_MCP].x * image_width
+p14 = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_PIP].x * image_width
+p15 = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_DIP].x * image_width
+p16 = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_TIP].x * image_width
+p17 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_MCP].x * image_width
+p18 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_PIP].x * image_width
+p19 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_DIP].x * image_width
+p20 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP].x * image_width
+
+q0 = hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].y * image_hight
+q1 = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_CMC].y * image_hight
+q2 = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_MCP].y * image_hight
+q3 = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_IP].y * image_hight
+q4 = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].y * image_hight
+q5 = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_MCP].y * image_hight
+q6 = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_PIP].y * image_hight
+q7 = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_DIP].y * image_hight
+q8 = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].y * image_hight
+q9 = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_MCP].y * image_hight
+q10 = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_PIP].y * image_hight
+q11 = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_DIP].y * image_hight
+q12 = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP].y * image_hight
+q13 = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_MCP].y * image_hight
+q14 = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_PIP].y * image_hight
+q15 = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_DIP].y * image_hight
+q16 = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_TIP].y * image_hight
+q17 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_MCP].y * image_hight
+q18 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_PIP].y * image_hight
+q19 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_DIP].y * image_hight
+q20 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP].y * image_hight
+    
+if ((p0 > p12) and (p0 > p20) and (p0 > p4) and (p0 > p8) and (p0 > p16)):
+    image = cv2.rotate(image, cv2.cv2.ROTATE_90_CLOCKWISE)
+    image = cv2.rotate(image, cv2.cv2.ROTATE_90_CLOCKWISE)
+else:
+    if ((q0 > q12) and (q0 > q20) and (q0 > q16) and (q0 > q8) and (q0 > q4)):
+        image = cv2.rotate(image, cv2.cv2.ROTATE_90_CLOCKWISE)
+    else:
+        if ((q0 < q12) and (q0 < q20) and (q0 < q4) and (q0 < q8) and (q0 < q16)):
+            image = cv2.rotate(image, cv2.cv2.ROTATE_90_CLOCKWISE)
+            image = cv2.rotate(image, cv2.cv2.ROTATE_90_CLOCKWISE)
+            image = cv2.rotate(image, cv2.cv2.ROTATE_90_CLOCKWISE)
+            
+imgplot = plt.imshow(img)
+mp_hands = mp.solutions.hands
+
+mp_drawing = mp.solutions.drawing_utils
+
+hands = mp_hands.Hands(static_image_mode=True,
+                      max_num_hands=2,
+                      min_detection_confidence=0.7)
+
+image_hight, image_width, _ = image.shape
+
+results = hands.process(cv2.cvtColor(image,cv2.COLOR_BGR2RGB))
+
+annoted_image = image.copy()
+for hand_landmarks in results.multi_hand_landmarks:
+    mp_drawing.draw_landmarks(annoted_image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+
+print(q0)
+print(q0)
+print(q20)
+print(q20)
+
+if(q2 < q20):
+    image = cv2.flip(image,0)
+
+mp_hands = mp.solutions.hands
+
+mp_drawing = mp.solutions.drawing_utils
+
+hands = mp_hands.Hands(static_image_mode=True,
+                      max_num_hands=2,
+                      min_detection_confidence=0.7)
+
+
+image_hight, image_width, _ = image.shape
+    
+results = hands.process(cv2.cvtColor(image,cv2.COLOR_BGR2RGB))
+    
+annoted_image = image.copy()
+
+print('Handedness: ', results.multi_handedness)
+ 
+for hand_landmarks in results.multi_hand_landmarks:
+    mp_drawing.draw_landmarks(annoted_image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+#imageshow = plt.imshow(cv2.cvtColor(annoted_image,cv2.COLOR_BGR2RGB))
+#cv2.imshow("Image",cv2.flip(annoted_image,1))
+#cv2.waitKey(0)
+#cv2.destroyAllWindows()
+
+p0 = hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].x * image_width
+p1 = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_CMC].x * image_width
+p2 = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_MCP].x * image_width
+p3 = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_IP].x * image_width
+p4 = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].x * image_width
+p5 = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_MCP].x * image_width
+p6 = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_PIP].x * image_width
+p7 = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_DIP].x * image_width
+p8 = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].x * image_width
+p9 = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_MCP].x * image_width
+p10 = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_PIP].x * image_width
+p11 = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_DIP].x * image_width
+p12 = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP].x * image_width
+p13 = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_MCP].x * image_width
+p14 = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_PIP].x * image_width
+p15 = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_DIP].x * image_width
+p16 = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_TIP].x * image_width
+p17 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_MCP].x * image_width
+p18 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_PIP].x * image_width
+p19 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_DIP].x * image_width
+p20 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP].x * image_width
+
+q0 = hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].y * image_hight
+q1 = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_CMC].y * image_hight
+q2 = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_MCP].y * image_hight
+q3 = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_IP].y * image_hight
+q4 = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].y * image_hight
+q5 = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_MCP].y * image_hight
+q6 = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_PIP].y * image_hight
+q7 = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_DIP].y * image_hight
+q8 = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].y * image_hight
+q9 = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_MCP].y * image_hight
+q10 = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_PIP].y * image_hight
+q11 = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_DIP].y * image_hight
+q12 = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP].y * image_hight
+q13 = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_MCP].y * image_hight
+q14 = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_PIP].y * image_hight
+q15 = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_DIP].y * image_hight
+q16 = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_TIP].y * image_hight
+q17 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_MCP].y * image_hight
+q18 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_PIP].y * image_hight
+q19 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_DIP].y * image_hight
+q20 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP].y * image_hight
+
+def thumbisopen():
+    if((p1 < p2) and (p2 < p3) and (p3 < p4) and (q1 < q2) and (q2 < q3) and (q3 < q4)):
+        return True
+        thumbF = 1
+    else:
+        return False
+        thumbF = 0
+    
+def fingeroneisopen():
+    if((p5 < p6) and (p6 < p7) and (p7 < p8)):
+        return True
+        oneF = 1
+    else:
+        return False
+        oneF = 0
+
+def fingertwoisopen():
+    if((p9 < p10) and (p10 < p11) and (p11 < p12)):
+        return True
+        twoF = 1
+    else:
+        return False
+        twoF = 0
+    
+def fingerthreeisopen():
+    if((p13 < p14) and (p14 < p15) and (p15 < p16)):
+        return True
+        threeF = 1
+    else:
+        return False
+        threeF = 0
+    
+def fingerfourisopen():
+    if((p17 < p18) and (p18 < p19) and (p19 < p20)):
+        return True
+        fourF = 1
+    else:
+        return False
+        fourF = 0 
+    
+cnt = 0;
+a = thumbisopen()
+if(a == True):
+    print("Thumb")
+    cnt = cnt + 1;
+b = fingeroneisopen()
+if(b == True):
+    print("One")
+    cnt = cnt + 1;
+c = fingertwoisopen()
+if(c == True):
+    print("two")
+    cnt = cnt + 1;
+d = fingerthreeisopen()
+if(d == True):
+    print("three")
+    cnt = cnt + 1;
+e = fingerfourisopen()
+if(e == True):
+    print("four")
+    cnt = cnt + 1;
+    
+    
+def aposition():
+    if((oneF == 0) and (twoF == 0) and (threeF == 0) and (fourF == 0) and (p4 > p5) and (p4 > p17)):
+        return True
+    else:
+        return False
+    
+def bosition():
+    if((oneF == 1) and (twoF == 1) and (threeF == 1) and (fourF == 1) and (thumbF == 0) and (q4 < q3) and (p4 > p17)):
+        return True
+    else:
+        return False 
+    
+print(cnt)
+#transposed = np.array(transposed)
+
+cv2.putText(annoted_image, str(cnt), (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+#annoted_image = cv2.flip(annoted_image,1)
+imageshow = plt.imshow(cv2.cvtColor(annoted_image,cv2.COLOR_BGR2RGB))
+#transposed.show()
