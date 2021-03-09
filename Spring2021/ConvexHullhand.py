@@ -4,9 +4,22 @@ import cv2 as cv
 import sys
 def main():
 
-    img_path = sys.argv[1]
-    img = cv.imread(img_path)
+    # importing practice
+    #img_path = "hand.jpg"
+    #print(img_path)
+    #img = io.imread(img_path)
+    #print(img)
+    #cv.imshow('palm image', img)
 
+
+
+    img_path = r"Spring2021\hand_4.png"
+    img = cv.imread(img_path)
+    #print(img_path)
+
+    
+
+ 
     hsvim = cv.cvtColor(img, cv.COLOR_BGR2HSV)
     lower = np.array([0, 48, 80], dtype="uint8")
     upper = np.array([20, 255, 255], dtype="uint8")
@@ -47,7 +60,12 @@ def main():
     cv.putText(img, str(cnt), (0, 50), cv.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv.LINE_AA)
 
     cv.imwrite("final_result.jpg", img)
+
+    print(np.array(img))
+
     return
+
+
 
 if __name__ ==  '__main__':
     main()
