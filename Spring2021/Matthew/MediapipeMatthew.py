@@ -59,3 +59,4 @@ with mp_hands.Hands(
     p20 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP].x * image_width
     print(p0)
     
+    
