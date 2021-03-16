@@ -104,6 +104,7 @@ else:
 
 cv.putText(img, str(cnt), (0, 50), cv.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv.LINE_AA)
 
+
 #showing the result
 plt.imshow(img)
 plt.show()
