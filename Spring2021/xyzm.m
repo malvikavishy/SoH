@@ -12,8 +12,8 @@
 % Author: Slight of Hand (Sriram,Zi,Malvika,Hyun).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-[x, y, z, r, g, b, mask] = xyzmread("hand 1.xyzm"); % function call
-[filepath,name,ext] = fileparts("hand 1.xyzm");
+[x, y, z, r, g, b, mask] = xyzmread("hand 8.xyzm"); % function call
+[filepath,name,ext] = fileparts("hand 8.xyzm");
 
 % getting the size of the picture
 colRange = 1:size(x, 1);     
@@ -60,18 +60,29 @@ end
 r_mat = r .* bin_mat;
 g_mat = g .* bin_mat;
 b_mat = b .* bin_mat;
+x_mat = x .* bin_mat;
+y_mat = y .* bin_mat;
+z_mat = z .* bin_mat;
 
 % creating the RGB image
 % since our image consists of r,g,b vectors, we need to concatenate the
 % three to make an image of the size 480x640x3
-image = cat(3, r_mat, g_mat, b_mat);
+image = cat(3, r_mat, g_mat, b_mat);    % double
 image_bin = uint8(image);
 figure(3);
 imshow(image_bin);
 
+figure(4)
+image1 = cat(3, x_mat, y_mat, z_mat); 
+image_bin1 = uint16(image);
+imshow(image_bin);
+
 % saving the image
 filename_bin = strcat(name, ".png");
+filename_txt = strcat(name, ".txt");
 imwrite(image_bin,filename_bin);
+dlmwrite(filename_txt,z_mat,'newline','pc','delimiter',' ');
+
 
 
 % figure(4);
