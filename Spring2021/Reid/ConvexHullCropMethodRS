@@ -1,0 +1,106 @@
+import numpy as np
+from rdp import rdp
+from PIL import Image
+import cv2 as cv
+import sys
+from matplotlib import pyplot as plt
+import matplotlib.image as mpimg
+import imutils
+from math import radians, cos, sin, asin, sqrt
+import math
+
+def main():
+
+    img = cv.imread('Documents/hand_5.png')
+
+    #noise reduction
+    hsvim = cv.cvtColor(img, cv.COLOR_BGR2HSV)
+    lower = np.array([0, 20, 40], dtype="uint8")
+    upper = np.array([255, 255, 255], dtype="uint8")
+    skinRegionHSV = cv.inRange(hsvim, lower, upper)
+    blurred = cv.blur(skinRegionHSV, (2, 2))
+    ret, thresh = cv.threshold(blurred, 0, 255, cv.THRESH_BINARY)
+    cv.imwrite("thresh.jpg", thresh)
+    
+    #contours
+    contours, hierarchy = cv.findContours(thresh, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+    contours = max(contours, key=lambda x: cv.contourArea(x))
+    cv.drawContours(img, [contours], -1, (255, 255, 0), 2)
+    cv.imwrite("contours.jpg", img)
+    
+    hull = cv.convexHull(contours)
+    cv.drawContours(img, [hull], -1, (0, 255, 255), 2)
+    cv.imwrite("hull.jpg", img)
+
+    hull = cv.convexHull(contours, returnPoints=False)
+    defects = cv.convexityDefects(contours, hull)
+    
+    #Get Extreme Points
+    cnts = cv.findContours(thresh, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+    cnts = imutils.grab_contours(cnts)
+    c = max(cnts, key=cv.contourArea)
+    extRight = tuple(c[c[:, :, 0].argmax()][0])
+    extLeft = tuple(c[c[:, :, 0].argmin()][0])
+    extBot = tuple(c[c[:, :, 1].argmax()][0])
+    extTop = tuple(c[c[:, :, 1].argmin()][0])
+    cv.circle(img, extRight, 8, (0, 255, 0), -1)
+    cv.circle(img, extLeft, 8, (0, 255, 0), -1)
+    cv.circle(img, extBot, 8, (0, 255, 0), -1)
+    cv.circle(img, extTop, 8, (0, 255, 0), -1)
+    
+    #Get center point
+    M = cv.moments(c)
+    cX = int(M["m10"] / M["m00"])
+    cY = int(M["m01"] / M["m00"])
+
+    
+    #Top
+    x = 640
+    while(x > 0):
+        y = 0
+        while(y < extTop[1] - 10):
+            #print(x)
+            cv.circle(img, (x, y), 5, (0, 255, 0), -1)
+            y = y + 1
+        x = x - 1
+    
+    #Bottom
+    x = 0
+    while(x < 640):
+        y = 480
+        while(y > extBot[1] + 10):
+            #print(x)
+            cv.circle(img, (x, y), 5, (0, 255, 0), -1)
+            y = y - 1
+        x = x + 1
+    #Left
+    y = 0
+    while(y < 480):
+        x = 0
+        while(x < extLeft[0] - 10):
+            cv.circle(img, (x, y), 5, (0, 255, 0), -1)
+            x = x + 1
+        y = y + 1
+    
+    #Right
+    y = 0
+    while(y < 480):
+        x = 640
+        while(x > extRight[0] + 10):
+            cv.circle(img, (x, y), 5, (0, 255, 0), -1)
+            x = x - 1
+        y = y + 1
+    
+    # draw the center of the shape on the image
+    cv.circle(img, (cX, cY), 7, (0, 0, 255), -1)
+    cv.imwrite("final_result.jpg", img)
+    imgplot = plt.imshow(img)
+    print(extBot)
+    print(extLeft)
+    print(extTop[0])
+    
+    
+    return
+    
+if __name__ ==  '__main__':
+    main()
