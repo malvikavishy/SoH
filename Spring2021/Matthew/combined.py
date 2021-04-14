@@ -10,20 +10,12 @@ from math import radians, cos, sin, asin, sqrt
 import math
 import mediapipe as mp
 
-def curve5(z1, z2, z3, z4):
-    if(z1 < z2 and z3 > z4):
-        return True
-    return False
-
-def curve5Thumb(x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4):
-    if(y1 > y2 and y2 > y3 and y3 > y4 and x3 == x4): # this x part will not work
-        return True
-    return False
+# Hand function code
 
 
 def main():
 
-    img = cv.imread(r'Spring2021\Hand_pngs\d hand.png')
+    img = cv.imread(r'Spring2021\Hand_pngs\s hand.png')
 
     #noise reduction
     hsvim = cv.cvtColor(img, cv.COLOR_BGR2HSV)
@@ -105,8 +97,10 @@ def main():
     
     # draw the center of the shape on the image
     #cv.circle(img, (cX, cY), 7, (0, 0, 255), -1)
-    img2 = cv.imread(r'Spring2021\Hand_pngs\d hand.png')
+
+    img2 = cv.imread(r'Spring2021\Hand_pngs\s hand.png')
     crop = img2[extTop[1] - 5:extBot[1] + 5, extLeft[0] - 5:extRight[0] + 5, 0:3]
+
     #print(np.shape(crop))
     #print(np.shape((img2)))
     #imag = Image.fromarray(crop, 'RGB')
@@ -125,6 +119,13 @@ def main():
     #img_path = r"Spring2021\final_result.jpg"
     image = crop
     #print(image)
+
+    for i in range(len(image)):
+        for j in range(len(image[0])):
+            if (image[i][j][0] == 0 and image[i][j][1] == 0 and image[i][j][2] == 0): 
+                image[i][j][0] = 255
+                image[i][j][1] = 255
+                image[i][j][2] = 255
 
     # For static images:
     with mp_hands.Hands(
@@ -152,9 +153,9 @@ def main():
         # )
             mp_drawing.draw_landmarks(
             annotated_image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
-            cv.imwrite('mediaImage.png', cv.flip(annotated_image, 1))
+            cv.imwrite('mediaImage.png', annotated_image)
     
-    z_data = np.loadtxt('Spring2021\Z data\d hand.txt')
+    z_data = np.loadtxt('Spring2021\Z data\\s hand.txt')
     z = z_data[extTop[1] - 5:extBot[1] + 5, extLeft[0] - 5:extRight[0] + 5]
     #z = np.fliplr(z)   #maybe? 
     
@@ -223,6 +224,11 @@ def main():
     p19z = z[int(p19y)][int(p19x)]
     p20z = z[int(p20y)][int(p20x)]
 
+
+
+
+
+    ''' 
     print('0', p0z)
     print(p1z)
     print(p2z)
@@ -244,8 +250,47 @@ def main():
     print(p18z)
     print(p19z)
     print(p20z)
+    '''
+    
+    #p
+    a = (p1x < p2x and p2x < p3x and p3x < p4x) and (p3y < p4y and p3y < p2y)
+    b = (p5x < p6x) and (p6x < p7x) and (p7x < p8x)
+    c = p12z > p11z and p11z > p10z and p10z > p9z and p9z > p8z # this doesn't work and i hate it
+    d = (p13x > p14x) and (p14x > p15x)
+    e = (p17x > p18x) and (p18x > p19x)
+
+
+    #r b is index/middle crossed
+    a = (p1x < p2x and p2x < p3x) and (p3y < p4y and p2y < p3y)
+    b = (p5x < p6x and p6x < p7x and p7x < p8x and p9x < p10x and p10x < p11x and p11x < p12x and p12x) and (p12y < p8y and p6y < p10y)
+    c = b
+    d = (p14x > p15x) and (p15x > p16x)
+    e = (p18x > p19x) and (p19x > p20x)
+
+
+    #s
+    a = (p2x < p3x) and (p3y < p4y)
+    b = (p6x > p5x)  and (p6x > p7x)
+    c = (p10x > p9x)  and (p10x > p9x)
+    d = (p14x > p13x)  and (p14x > p13x)
+    e = (p18x > p17x)  and (p18x > p17x)
+
+    print(a)
+    print(b)
+    print(c)
+    print(d)
+    print(e)
+
 
     #print('y', p8y)
 
+    #p-s
+    # p - open thumb, out, 4 4
+
+
+
+
 if __name__ ==  '__main__':
     main()
+
+
