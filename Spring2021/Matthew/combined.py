@@ -10,13 +10,19 @@ from math import radians, cos, sin, asin, sqrt
 import math
 import mediapipe as mp
 
-# Hand function code
+# Matthew Li's code for VIP Spring2021
 
 
 def main():
 
-    img = cv.imread(r'Spring2021\Hand_pngs\s hand.png')
+    '''
+    CONVEX HULL
+    '''
+    # Read in the image from wherever it is
+    img = cv.imread(r'Spring2021\Hand_pngs\p hand.png')
 
+    # All of this is from the website where convex hull code was found I think
+    # https://medium.com/analytics-vidhya/hand-detection-and-finger-counting-using-opencv-python-5b594704eb08 here if needed
     #noise reduction
     hsvim = cv.cvtColor(img, cv.COLOR_BGR2HSV)
     lower = np.array([0, 20, 40], dtype="uint8")
@@ -39,6 +45,7 @@ def main():
     hull = cv.convexHull(contours, returnPoints=False)
     defects = cv.convexityDefects(contours, hull)
     
+    #I think Reid wrote this part but it basically just finds extreme points for all 4 sides
     #Get Extreme Points
     cnts = cv.findContours(thresh, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
     cnts = imutils.grab_contours(cnts)
@@ -47,86 +54,32 @@ def main():
     extLeft = tuple(c[c[:, :, 0].argmin()][0])
     extBot = tuple(c[c[:, :, 1].argmax()][0])
     extTop = tuple(c[c[:, :, 1].argmin()][0])
-    #cv.circle(img, extRight, 8, (0, 255, 0), -1)
-    #cv.circle(img, extLeft, 8, (0, 255, 0), -1)
-    #cv.circle(img, extBot, 8, (0, 255, 0), -1)
-    #cv.circle(img, extTop, 8, (0, 255, 0), -1)
     
-    #Get center point
-    M = cv.moments(c)
-    cX = int(M["m10"] / M["m00"])
-    cY = int(M["m01"] / M["m00"])
-
-    
-    #Top
-    x = 640
-    while(x > 0):
-        y = 0
-        while(y < extTop[1] - 10):
-            #print(x)
-            cv.circle(img, (x, y), 5, (0, 255, 0), -1)
-            y = y + 1
-        x = x - 1
-    
-    #Bottom
-    x = 0
-    while(x < 640):
-        y = 480
-        while(y > extBot[1] + 10):
-            #print(x)
-            cv.circle(img, (x, y), 5, (0, 255, 0), -1)
-            y = y - 1
-        x = x + 1
-    #Left
-    y = 0
-    while(y < 480):
-        x = 0
-        while(x < extLeft[0] - 10):
-            cv.circle(img, (x, y), 5, (0, 255, 0), -1)
-            x = x + 1
-        y = y + 1
-    
-    #Right
-    y = 0
-    while(y < 480):
-        x = 640
-        while(x > extRight[0] + 10):
-            cv.circle(img, (x, y), 5, (0, 255, 0), -1)
-            x = x - 1
-        y = y + 1
-    
-    # draw the center of the shape on the image
-    #cv.circle(img, (cX, cY), 7, (0, 0, 255), -1)
-
-    img2 = cv.imread(r'Spring2021\Hand_pngs\s hand.png')
+    # This part takes the extreme points found and crops an image of the hand using the extreme points found
+    img2 = cv.imread(r'Spring2021\Hand_pngs\p hand.png')
     crop = img2[extTop[1] - 5:extBot[1] + 5, extLeft[0] - 5:extRight[0] + 5, 0:3]
-
-    #print(np.shape(crop))
-    #print(np.shape((img2)))
-    #imag = Image.fromarray(crop, 'RGB')
     cv.imwrite("final_result.jpg", crop)
-    imgplot = plt.imshow(img)
-    #print(extTop)
-    #print(extBot)
-    #print(extLeft)
-    #print(extRight)
-    
-    
-    
+
+    '''
+    MEDIAPIPE
+    '''
+    # Most of this is taken from Google's website about MediaPipe
     mp_drawing = mp.solutions.drawing_utils
     mp_hands = mp.solutions.hands
 
-    #img_path = r"Spring2021\final_result.jpg"
+    # Path of the image - we are using the cropped image created above
     image = crop
-    #print(image)
 
+    # This part replaces the background of the image (black) with any color you want, just get the right rgb code 
+    # 255 is white, 0 is black
     for i in range(len(image)):
         for j in range(len(image[0])):
             if (image[i][j][0] == 0 and image[i][j][1] == 0 and image[i][j][2] == 0): 
-                image[i][j][0] = 255
-                image[i][j][1] = 255
-                image[i][j][2] = 255
-
+                image[i][j][0] = 192
+                image[i][j][1] = 192
+                image[i][j][2] = 192
+    
+    # Start of stuff taken from Google
     # For static images:
     with mp_hands.Hands(
         static_image_mode=True,
@@ -138,6 +91,8 @@ def main():
         image = cv.flip(image, 1)
         # Convert the BGR image to RGB before processing.
         results = hands.process(cv.cvtColor(image, cv.COLOR_BGR2RGB))
+
+        # Apparantly this Handedness part is actually useful?
 
         # Print handedness and draw hand landmarks on the image.
         #print('Handedness:', results.multi_handedness)
@@ -154,12 +109,15 @@ def main():
             mp_drawing.draw_landmarks(
             annotated_image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
             cv.imwrite('mediaImage.png', annotated_image)
-    
-    z_data = np.loadtxt('Spring2021\Z data\\s hand.txt')
-    z = z_data[extTop[1] - 5:extBot[1] + 5, extLeft[0] - 5:extRight[0] + 5]
-    #z = np.fliplr(z)   #maybe? 
-    
+    # End of stuff taken from Google site
 
+    # The 3D sensor used to take capture the hands also returns the z-data of each point of the hand
+    # Here we crop the z-data matrix using the same points as the cropped image
+    z_data = np.loadtxt('Spring2021\Z data\s hand.txt')
+    z = z_data[extTop[1] - 5:extBot[1] + 5, extLeft[0] - 5:extRight[0] + 5]
+    
+    
+    # Mediapipe returns the x and y values of each landmark, here we assign them to a variable
     p0x = hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].x * image_width
     p1x = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_CMC].x * image_width
     p2x = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_MCP].x * image_width
@@ -202,6 +160,9 @@ def main():
     p18y = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_PIP].y * image_height
     p19y = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_DIP].y * image_height
     p20y = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP].y * image_height
+
+    # Using the x and y values found, we also find the z data at these points
+    # Z-data doesn't seem to work a lot of the time for me, might want to look into it
     p0z = z[int(p0y)][int(p0x)]
     p1z = z[int(p1y)][int(p1x)]
     p2z = z[int(p2y)][int(p2x)]
@@ -224,49 +185,23 @@ def main():
     p19z = z[int(p19y)][int(p19x)]
     p20z = z[int(p20y)][int(p20x)]
 
-
-
-
-
-    ''' 
-    print('0', p0z)
-    print(p1z)
-    print(p2z)
-    print(p3z)
-    print(p4z)
-    print('5' , p5z)
-    print(p6z)
-    print(p7z)
-    print(p8z)
-    print(p9z)
-    print('10' , p10z)
-    print(p11z)
-    print(p12z)
-    print(p13z)
-    print(p14z)
-    print(p15z)
-    print(p16z)
-    print(p17z)
-    print(p18z)
-    print(p19z)
-    print(p20z)
-    '''
-    
+    # Determining whether a hand is in the shape of a certain letter, these ones specifically are p, r, and s
+    # Basically just comparing the x, y, and z points of each landmark to one another
+    # These could also probably be more specific (or use the functions other people made) but they work for the hand images I looked at
     #p
     a = (p1x < p2x and p2x < p3x and p3x < p4x) and (p3y < p4y and p3y < p2y)
     b = (p5x < p6x) and (p6x < p7x) and (p7x < p8x)
-    c = p12z > p11z and p11z > p10z and p10z > p9z and p9z > p8z # this doesn't work and i hate it
+    c = p12z > p11z and p11z > p10z and p10z > p9z and p9z > p8z # this doesn't work, z-data is rough
     d = (p13x > p14x) and (p14x > p15x)
     e = (p17x > p18x) and (p18x > p19x)
 
-
-    #r b is index/middle crossed
+    #r 
+    # b is checking if the index and middle fingers are crossed, look at r hand picture for example
     a = (p1x < p2x and p2x < p3x) and (p3y < p4y and p2y < p3y)
     b = (p5x < p6x and p6x < p7x and p7x < p8x and p9x < p10x and p10x < p11x and p11x < p12x and p12x) and (p12y < p8y and p6y < p10y)
     c = b
     d = (p14x > p15x) and (p15x > p16x)
     e = (p18x > p19x) and (p19x > p20x)
-
 
     #s
     a = (p2x < p3x) and (p3y < p4y)
@@ -274,20 +209,6 @@ def main():
     c = (p10x > p9x)  and (p10x > p9x)
     d = (p14x > p13x)  and (p14x > p13x)
     e = (p18x > p17x)  and (p18x > p17x)
-
-    print(a)
-    print(b)
-    print(c)
-    print(d)
-    print(e)
-
-
-    #print('y', p8y)
-
-    #p-s
-    # p - open thumb, out, 4 4
-
-
 
 
 if __name__ ==  '__main__':
