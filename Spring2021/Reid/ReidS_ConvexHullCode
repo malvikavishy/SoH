@@ -1,0 +1,60 @@
+# The following code was testing for importing data, uploaded to document attempts, not practically useful
+
+#part 1
+import cv2
+
+image= cv2.imread('pictures/xyzm1.png')
+#image.show()
+original_image= image
+
+gray= cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+
+edges= cv2.Canny(gray, 50,200)
+
+#contours, hierarchy= cv2.findContours(edges.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+contours, hierarchy = cv2.findContours(edges.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+for cnt in contours:
+    hull= cv2.convexHull(cnt)
+    area = cv2.contourArea(cnt)
+    print(area)
+    if (area < 100000) and (area > 1000):
+         cv2.drawContours(image, [hull],0,(0,255,0),2)
+    cv2.imshow('Convex Hull', image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+   
+#part two
+# code trying to import matlab image, imports array but not image
+
+import numpy
+import cv2
+import numpy as np
+import scipy.io
+import matplotlib.pyplot as plt
+import keras.models
+import tensorflow
+from PIL import Image, ImageOps
+
+image_denoise = scipy.io.loadmat('documents/image_denoise.mat')
+print("The Array is: ", image_denoise)
+
+#display(Image(filename='image_denoise.mat'))
+
+image_denoise = np.array(image_denoise)
+im = Image.fromarray(image_denoise)
+im.save("your_file.jpeg")
+
+# other code importing from matlab
+
+#x = scipy.io.loadmat('documents/x.mat')
+#print("The Array is: ", x)
+
+#y = scipy.io.loadmat('documents/y.mat')
+#print("The Array is: ", y)
+
+#z = scipy.io.loadmat('documents/z.mat')
+#print("The Array is: ", z)
+
+#d = np.dstack([x,y,z])
+#print("The Array is: ", d)
