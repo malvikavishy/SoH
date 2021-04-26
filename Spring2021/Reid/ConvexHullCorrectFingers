@@ -7,7 +7,7 @@ import matplotlib.image as mpimg
 import imutils
 from math import radians, cos, sin, asin, sqrt
 
-def isInside(circle_x, circle_y, rad, x, y): 
+def isInside(circle_x, circle_y, rad, x, y): #finds whether given point is withing circle given center point and radius
       
     # Compare radius of circle 
     # with distance of its center 
