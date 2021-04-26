@@ -9,7 +9,7 @@ import imutils
 from math import radians, cos, sin, asin, sqrt
 import math
 
-def isInside(circle_x, circle_y, rad, x, y): 
+def isInside(circle_x, circle_y, rad, x, y): #finds whether given point is withing circle given center point and radius
       
     # Compare radius of circle 
     # with distance of its center 
@@ -23,40 +23,40 @@ def isInside(circle_x, circle_y, rad, x, y):
 def main():
 
     #Get Image
-    #img_path = sys.argv[1]
     img = cv.imread('Documents/hand_1.png')
-    #img = cv.imread('Pictures/roc2.jpg')
     
     #noise reduction
     hsvim = cv.cvtColor(img, cv.COLOR_BGR2HSV)
-    lower = np.array([0, 20, 40], dtype="uint8")
-    upper = np.array([255, 255, 255], dtype="uint8")
+    lower = np.array([0, 20, 40], dtype="uint8") #minimum cutoff threshold
+    upper = np.array([255, 255, 255], dtype="uint8") #maximum cutoff threshold
     skinRegionHSV = cv.inRange(hsvim, lower, upper)
-    blurred = cv.blur(skinRegionHSV, (2, 2))
+    blurred = cv.blur(skinRegionHSV, (2, 2)) # blur edges
     ret, thresh = cv.threshold(blurred, 0, 255, cv.THRESH_BINARY)
     cv.imwrite("thresh.jpg", thresh)
     
     #contours
-    contours, hierarchy = cv.findContours(thresh, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-    contours = max(contours, key=lambda x: cv.contourArea(x))
-    cv.drawContours(img, [contours], -1, (255, 255, 0), 2)
+    contours, hierarchy = cv.findContours(thresh, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE) #identifies contour outlines
+    contours = max(contours, key=lambda x: cv.contourArea(x))#identifies contour of maximum size
+    cv.drawContours(img, [contours], -1, (255, 255, 0), 2) # draws contour
     cv.imwrite("contours.jpg", img)
     
-    hull = cv.convexHull(contours)
-    cv.drawContours(img, [hull], -1, (0, 255, 255), 2)
+    hull = cv.convexHull(contours) # convex hull around image extremes
+    cv.drawContours(img, [hull], -1, (0, 255, 255), 2) # draw convex hull
     cv.imwrite("hull.jpg", img)
 
     hull = cv.convexHull(contours, returnPoints=False)
-    defects = cv.convexityDefects(contours, hull)
+    defects = cv.convexityDefects(contours, hull) # identify defects
     
     #Get Extreme Points
     cnts = cv.findContours(thresh, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
     cnts = imutils.grab_contours(cnts)
     c = max(cnts, key=cv.contourArea)
-    extRight = tuple(c[c[:, :, 0].argmax()][0])
-    extLeft = tuple(c[c[:, :, 0].argmin()][0])
-    extBot = tuple(c[c[:, :, 1].argmax()][0])
-    extTop = tuple(c[c[:, :, 1].argmin()][0])
+    extRight = tuple(c[c[:, :, 0].argmax()][0]) # point farthest to the right
+    extLeft = tuple(c[c[:, :, 0].argmin()][0])# point farthest to the left
+    extBot = tuple(c[c[:, :, 1].argmax()][0])# point farthest to the bottom
+    extTop = tuple(c[c[:, :, 1].argmin()][0])# point farthest to the top
+    
+    #place points on image
     cv.circle(img, extRight, 8, (0, 255, 0), -1)
     cv.circle(img, extLeft, 8, (0, 255, 0), -1)
     cv.circle(img, extBot, 8, (0, 255, 0), -1)
@@ -77,38 +77,38 @@ def main():
     previous = 0
     arrA = []
     arrB = []
-    for i in range(len(contours)):
-        varG = contours[i]
-        varH = varG[0]
-        varX = varH[0]
-        varY = varH[1]
-        distance = math.sqrt( ((cX-varX)**2)+((cY-varY)**2) )
-        if distance <= previous:
+    for i in range(len(contours)): # all contours
+        varG = contours[i] # given contour
+        varH = varG[0] # first part of information
+        varX = varH[0] # x data
+        varY = varH[1] # y data
+        distance = math.sqrt( ((cX-varX)**2)+((cY-varY)**2) ) # distance between center of object and points
+        if distance <= previous: # if distance is decreasing, count increases
             cntP = cntP + 1
-        else: 
+        else: # if distance is increasing, count returns to 0
             cntP = 0
-        if cntP == 5:
+        if cntP == 5: # number of points traveled decreasing
             cntQ = cntQ + 1
-            numP = i - 5
+            numP = i - 5 # index point is 5 before point is reached
             varG = contours[numP]
             varH = varG[0]
-            varX = varH[0]
-            varY = varH[1]
+            varX = varH[0] # x of fingertip
+            varY = varH[1] # y of fingertip
             circle_x = extRight[0];
             circle_y = extRight[1];
             rad = 150;
-            if(isInside(circle_x, circle_y, rad, varX, varY)): 
+            if(isInside(circle_x, circle_y, rad, varX, varY)):  # not within extreme right
                 print("Inside");
             else:
-                arrA = np.append (arrA, varX)
+                arrA = np.append (arrA, varX) # fingertip point added to index
                 arrB = np.append (arrB, varY)
-        previous = distance
+        previous = distance # updated previous distance
 
     for i in range(len(arrA)):
         arrA = arrA.astype(int)
         arrB = arrB.astype(int)
         plotPo = (arrA[i - 1], arrB[i - 1])
-        cv.circle(img, plotPo, 7, [255, 0, 0], -1)
+        cv.circle(img, plotPo, 7, [255, 0, 0], -1) # put points at fingertips
         
     #see points
     #print(extRight)
@@ -118,7 +118,6 @@ def main():
     
     if defects is not None:
         cnt = 0
-    print(defects.shape[0])
     print(defects.shape[0])
     for i in range(defects.shape[0]):  # calculate the angle
         s, e, f, d = defects[i][0]
@@ -130,25 +129,24 @@ def main():
         c = np.sqrt((end[0] - far[0]) ** 2 + (end[1] - far[1]) ** 2)
         angle = np.arccos((b ** 2 + c ** 2 - a ** 2) / (2 * b * c))  # cosine theorem
         if angle <= np.pi / 2.75:  # angle less than this degree, treat as fingers
-            x = far[0];
-            y = far[1];
+            x = far[0]; # x variable
+            y = far[1]; # y variable
             circle_x = extRight[0];
             circle_y = extRight[1];
             rad = 150;
-            if(isInside(circle_x, circle_y, rad, x, y)): 
+            if(isInside(circle_x, circle_y, rad, x, y)): # finds whether point is within circle of extreme right
                 print("Inside");
             else: 
                 circle_x = cX;
                 circle_y = cY;
                 rad = 10;
-                if(isInside(circle_x, circle_y, rad, x, y)):
+                if(isInside(circle_x, circle_y, rad, x, y)): # finds whether point is within circle of center, currently too small of radius to interfere
                     print("Inside");
                 else:
                     print("Outside");
-                    print(far[1]);
-                    print(far);
                     cnt += 1
-                    cv.circle(img, far, 3, [0, 0, 255], -1)
+                    cv.circle(img, far, 3, [0, 0, 255], -1) # place point if outside
+    # below is code to artifically find fingers using distance between extreme and center points, assuming fingers are a certain length, worked with examples, not all images.
     if cnt > 0:
         cnt = cnt + 1
     else:
@@ -159,10 +157,8 @@ def main():
         if (cY - extTop[1] > 140):
             cnt = cnt + 1
     
-    cv.putText(img, str(cnt), (0, 50), cv.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv.LINE_AA)
+    cv.putText(img, str(cnt), (0, 50), cv.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv.LINE_AA) # display count of fingers
     #Below is code to manually add points
-    #mytuple = (105, 310)
-    #cv.circle(img, mytuple, 8, [255, 0, 0], -1)
     cv.imwrite("final_result.jpg", img)
     imgplot = plt.imshow(img)
     print(extBot)
