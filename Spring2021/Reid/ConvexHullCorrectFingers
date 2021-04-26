@@ -26,17 +26,17 @@ def main():
     
     #noise reduction
     hsvim = cv.cvtColor(img, cv.COLOR_BGR2HSV)
-    lower = np.array([0, 20, 40], dtype="uint8")
-    upper = np.array([255, 255, 255], dtype="uint8")
+    lower = np.array([0, 20, 40], dtype="uint8") #minimum cutoff threshold
+    upper = np.array([255, 255, 255], dtype="uint8") #maximum cutoff threshold
     skinRegionHSV = cv.inRange(hsvim, lower, upper)
-    blurred = cv.blur(skinRegionHSV, (2, 2))
+    blurred = cv.blur(skinRegionHSV, (2, 2)) # blur edges
     ret, thresh = cv.threshold(blurred, 0, 255, cv.THRESH_BINARY)
     cv.imwrite("thresh.jpg", thresh)
     
     #contours
-    contours, hierarchy = cv.findContours(thresh, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-    contours = max(contours, key=lambda x: cv.contourArea(x))
-    cv.drawContours(img, [contours], -1, (255, 255, 0), 2)
+    contours, hierarchy = cv.findContours(thresh, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE) #identifies contour outlines
+    contours = max(contours, key=lambda x: cv.contourArea(x))#identifies contour of maximum size
+    cv.drawContours(img, [contours], -1, (255, 255, 0), 2) # draws contour
     cv.imwrite("contours.jpg", img)
     
     hull = cv.convexHull(contours)
@@ -50,10 +50,11 @@ def main():
     cnts = cv.findContours(thresh, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
     cnts = imutils.grab_contours(cnts)
     c = max(cnts, key=cv.contourArea)
-    extRight = tuple(c[c[:, :, 0].argmax()][0])
-    extLeft = tuple(c[c[:, :, 0].argmin()][0])
-    extBot = tuple(c[c[:, :, 1].argmax()][0])
-    extTop = tuple(c[c[:, :, 1].argmin()][0])
+    extRight = tuple(c[c[:, :, 0].argmax()][0]) # point farthest to the right
+    extLeft = tuple(c[c[:, :, 0].argmin()][0])# point farthest to the left
+    extBot = tuple(c[c[:, :, 1].argmax()][0])# point farthest to the bottom
+    extTop = tuple(c[c[:, :, 1].argmin()][0])# point farthest to the top
+    # places points
     cv.circle(img, extRight, 8, (0, 255, 0), -1)
     cv.circle(img, extLeft, 8, (0, 255, 0), -1)
     cv.circle(img, extBot, 8, (0, 255, 0), -1)
@@ -90,20 +91,19 @@ def main():
             circle_x = extRight[0];
             circle_y = extRight[1];
             rad = 150;
-            if(isInside(circle_x, circle_y, rad, x, y)): 
+            if(isInside(circle_x, circle_y, rad, x, y)): # finds whether point is within circle of extreme right
                 print("Inside");
             else: 
                 circle_x = cX;
                 circle_y = cY;
                 rad = 10;
-                if(isInside(circle_x, circle_y, rad, x, y)):
+                if(isInside(circle_x, circle_y, rad, x, y)): # finds whether point is within circle of center, currently too small of radius to interfere
                     print("Inside");
                 else:
                     print("Outside");
-                    print(far[1]);
-                    print(far);
                     cnt += 1
-                    cv.circle(img, far, 3, [0, 0, 255], -1)
+                    cv.circle(img, far, 3, [0, 0, 255], -1) # place point if outside
+    # below is code to artifically find fingers using distance between extreme and center points, assuming fingers are a certain length, worked with examples, not all images. 
     if cnt > 0:
         cnt = cnt + 1
     else:
