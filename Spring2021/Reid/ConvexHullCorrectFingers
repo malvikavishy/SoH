@@ -39,12 +39,12 @@ def main():
     cv.drawContours(img, [contours], -1, (255, 255, 0), 2) # draws contour
     cv.imwrite("contours.jpg", img)
     
-    hull = cv.convexHull(contours)
-    cv.drawContours(img, [hull], -1, (0, 255, 255), 2)
+    hull = cv.convexHull(contours) # create convex hull around object extremes
+    cv.drawContours(img, [hull], -1, (0, 255, 255), 2) # draw convex hull
     cv.imwrite("hull.jpg", img)
 
     hull = cv.convexHull(contours, returnPoints=False)
-    defects = cv.convexityDefects(contours, hull)
+    defects = cv.convexityDefects(contours, hull) # identify defects in convex hull
     
     #Get Extreme Points
     cnts = cv.findContours(thresh, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
