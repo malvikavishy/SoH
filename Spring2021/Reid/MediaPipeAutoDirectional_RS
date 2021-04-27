@@ -8,36 +8,31 @@ from PIL import Image
 import numpy as np
 import matplotlib.image as mpimg
 
-img = cv2.imread('Documents/hand_4.png')
-
-#rotated     = colorImage.rotate(45)
+img = cv2.imread('Documents/hand_4.png') # import image
 
 imgplot = plt.imshow(img)
 
+# get mediapipe results
 mp_hands = mp.solutions.hands
-
 mp_drawing = mp.solutions.drawing_utils
 
 hands = mp_hands.Hands(static_image_mode=True,
                       max_num_hands=2,
-                      min_detection_confidence=0.7)
+                      min_detection_confidence=0.7) #mediapipe settings
 
-image = cv2.flip(img,1)
+image = cv2.flip(img,1) # flip image
 
-image_hight, image_width, _ = image.shape
+image_hight, image_width, _ = image.shape # get dimensions
 
-results = hands.process(cv2.cvtColor(image,cv2.COLOR_BGR2RGB))
+results = hands.process(cv2.cvtColor(image,cv2.COLOR_BGR2RGB)) # place points
 
 print('Handedness: ', results.multi_handedness)
 
 annoted_image = image.copy()
 for hand_landmarks in results.multi_hand_landmarks:
     mp_drawing.draw_landmarks(annoted_image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
-#imageshow = plt.imshow(cv2.cvtColor(annoted_image,cv2.COLOR_BGR2RGB))
-#cv2.imshow("Image",cv2.flip(annoted_image,1))
-#cv2.waitKey(0)
-#cv2.destroyAllWindows()
-
+    
+# below is the x dimension data of points
 p0 = hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].x * image_width
 p1 = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_CMC].x * image_width
 p2 = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_MCP].x * image_width
@@ -60,6 +55,7 @@ p18 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_PIP].x * image_width
 p19 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_DIP].x * image_width
 p20 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP].x * image_width
 
+# y dimension data
 q0 = hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].y * image_hight
 q1 = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_CMC].y * image_hight
 q2 = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_MCP].y * image_hight
@@ -82,6 +78,7 @@ q18 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_PIP].y * image_hight
 q19 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_DIP].y * image_hight
 q20 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP].y * image_hight
     
+# direction finder: positions so fingers point right directions
 if ((p0 > p12) and (p0 > p20) and (p0 > p4) and (p0 > p8) and (p0 > p16)):
     image = cv2.rotate(image, cv2.cv2.ROTATE_90_CLOCKWISE)
     image = cv2.rotate(image, cv2.cv2.ROTATE_90_CLOCKWISE)
@@ -95,15 +92,16 @@ else:
             image = cv2.rotate(image, cv2.cv2.ROTATE_90_CLOCKWISE)
             
 imgplot = plt.imshow(img)
-mp_hands = mp.solutions.hands
 
+# get new results for rotation
+mp_hands = mp.solutions.hands
 mp_drawing = mp.solutions.drawing_utils
 
 hands = mp_hands.Hands(static_image_mode=True,
                       max_num_hands=2,
-                      min_detection_confidence=0.7)
+                      min_detection_confidence=0.7) # mediapipe settings
 
-image_hight, image_width, _ = image.shape
+image_hight, image_width, _ = image.shape # dimensions
 
 results = hands.process(cv2.cvtColor(image,cv2.COLOR_BGR2RGB))
 
@@ -111,24 +109,19 @@ annoted_image = image.copy()
 for hand_landmarks in results.multi_hand_landmarks:
     mp_drawing.draw_landmarks(annoted_image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
 
-print(q0)
-print(q0)
-print(q20)
-print(q20)
-
 if(q2 < q20):
-    image = cv2.flip(image,0)
+    image = cv2.flip(image,0) # thumb should be on bottom, not top 
 
+# new results after flip
 mp_hands = mp.solutions.hands
-
 mp_drawing = mp.solutions.drawing_utils
 
 hands = mp_hands.Hands(static_image_mode=True,
                       max_num_hands=2,
-                      min_detection_confidence=0.7)
+                      min_detection_confidence=0.7) # mediapipe settings
 
 
-image_hight, image_width, _ = image.shape
+image_hight, image_width, _ = image.shape # dimensions
     
 results = hands.process(cv2.cvtColor(image,cv2.COLOR_BGR2RGB))
     
@@ -138,11 +131,8 @@ print('Handedness: ', results.multi_handedness)
  
 for hand_landmarks in results.multi_hand_landmarks:
     mp_drawing.draw_landmarks(annoted_image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
-#imageshow = plt.imshow(cv2.cvtColor(annoted_image,cv2.COLOR_BGR2RGB))
-#cv2.imshow("Image",cv2.flip(annoted_image,1))
-#cv2.waitKey(0)
-#cv2.destroyAllWindows()
 
+# x axis data
 p0 = hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].x * image_width
 p1 = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_CMC].x * image_width
 p2 = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_MCP].x * image_width
@@ -165,6 +155,7 @@ p18 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_PIP].x * image_width
 p19 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_DIP].x * image_width
 p20 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP].x * image_width
 
+# y axis data
 q0 = hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].y * image_hight
 q1 = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_CMC].y * image_hight
 q2 = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_MCP].y * image_hight
@@ -187,7 +178,7 @@ q18 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_PIP].y * image_hight
 q19 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_DIP].y * image_hight
 q20 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP].y * image_hight
 
-def thumbisopen():
+def thumbisopen(): # finds whether thumb is open
     if((p1 < p2) and (p2 < p3) and (p3 < p4) and (q1 < q2) and (q2 < q3) and (q3 < q4)):
         return True
         thumbF = 1
@@ -195,6 +186,7 @@ def thumbisopen():
         return False
         thumbF = 0
     
+# below is four definitions to find if fingers are open or not individually
 def fingeroneisopen():
     if((p5 < p6) and (p6 < p7) and (p7 < p8)):
         return True
@@ -226,7 +218,8 @@ def fingerfourisopen():
     else:
         return False
         fourF = 0 
-    
+ 
+ # the below code counts the number of fingers that are open
 cnt = 0;
 a = thumbisopen()
 if(a == True):
@@ -249,7 +242,7 @@ if(e == True):
     print("four")
     cnt = cnt + 1;
     
-    
+# testing functions, not part of final alphabet code
 def aposition():
     if((oneF == 0) and (twoF == 0) and (threeF == 0) and (fourF == 0) and (p4 > p5) and (p4 > p17)):
         return True
@@ -262,10 +255,7 @@ def bosition():
     else:
         return False 
     
-print(cnt)
-#transposed = np.array(transposed)
+print(cnt) # count
 
-cv2.putText(annoted_image, str(cnt), (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
-#annoted_image = cv2.flip(annoted_image,1)
+cv2.putText(annoted_image, str(cnt), (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA) # puts count on image
 imageshow = plt.imshow(cv2.cvtColor(annoted_image,cv2.COLOR_BGR2RGB))
-#transposed.show()
