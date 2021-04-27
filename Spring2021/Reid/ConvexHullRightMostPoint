@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 import imutils
 from math import radians, cos, sin, asin, sqrt
 
-def isInside(circle_x, circle_y, rad, x, y): 
+def isInside(circle_x, circle_y, rad, x, y): #finds whether given point is withing circle given center point and radius
       
     # Compare radius of circle 
     # with distance of its center 
@@ -19,42 +19,42 @@ def isInside(circle_x, circle_y, rad, x, y):
 
 def main():
 
+    # get image
     img_path = sys.argv[1]
-    #img = cv.imread('pictures/roc.png')
     img = cv.imread('Documents/hand_4.png')
-    #img= cv.imread('pictures/xyzm1.png')
-    #cv.imshow("image", img)
     
+    #noise reduction
     hsvim = cv.cvtColor(img, cv.COLOR_BGR2HSV)
-    lower = np.array([0, 20, 40], dtype="uint8")
-    upper = np.array([255, 255, 255], dtype="uint8")
+    lower = np.array([0, 20, 40], dtype="uint8") #minimum cutoff threshold
+    upper = np.array([255, 255, 255], dtype="uint8") #maximum cutoff threshold
     skinRegionHSV = cv.inRange(hsvim, lower, upper)
-    blurred = cv.blur(skinRegionHSV, (2, 2))
+    blurred = cv.blur(skinRegionHSV, (2, 2)) # blur edges
     ret, thresh = cv.threshold(blurred, 0, 255, cv.THRESH_BINARY)
-    #ret, thresh = cv.threshold(img, 0, 255, cv.THRESH_BINARY)
     cv.imwrite("thresh.jpg", thresh)
 
-    contours, hierarchy = cv.findContours(thresh, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-    contours = max(contours, key=lambda x: cv.contourArea(x))
-    cv.drawContours(img, [contours], -1, (255, 255, 0), 2)
+    #contours
+    contours, hierarchy = cv.findContours(thresh, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE) #identifies contour outlines
+    contours = max(contours, key=lambda x: cv.contourArea(x))#identifies contour of maximum size
+    cv.drawContours(img, [contours], -1, (255, 255, 0), 2) # draws contour
     cv.imwrite("contours.jpg", img)
 
-    hull = cv.convexHull(contours)
-    cv.drawContours(img, [hull], -1, (0, 255, 255), 2)
-    #cv.imshow("hull", img)
+    hull = cv.convexHull(contours)  # convex hull around image extremes
+    cv.drawContours(img, [hull], -1, (0, 255, 255), 2) # draw on image
     cv.imwrite("hull.jpg", img)
 
     hull = cv.convexHull(contours, returnPoints=False)
-    defects = cv.convexityDefects(contours, hull)
+    defects = cv.convexityDefects(contours, hull) # find defects in hull
     
+    # code below uses contours to find extreme right point on hand and places point
     cnts = cv.findContours(thresh, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
     cnts = imutils.grab_contours(cnts)
     c = max(cnts, key=cv.contourArea)
-    extRight = tuple(c[c[:, :, 0].argmax()][0])
+    extRight = tuple(c[c[:, :, 0].argmax()][0]) 
     cv.circle(img, extRight, 8, (0, 255, 0), -1)
     
     print(extRight)
     
+    # assigns variables necessary for using isInside definition (radius 500 is very high, set for testing)
     circle_x = extRight[0] 
     circle_y = extRight[1] 
     rad = 500; 
@@ -71,17 +71,17 @@ def main():
         c = np.sqrt((end[0] - far[0]) ** 2 + (end[1] - far[1]) ** 2)
         angle = np.arccos((b ** 2 + c ** 2 - a ** 2) / (2 * b * c))  # cosine theorem
         if angle <= np.pi / 3.25:  # angle less than 90 degree, treat as fingers
-            x = f
-            y = s
+            x = f # finger dip location x
+            y = s # finger dip location y
             if(isInside(circle_x, circle_y, rad, x, y)): 
                 print("Inside"); 
                 cnt += 1
                 cv.circle(img, far, 3, [0, 0, 255], -1)
             else: 
                 print("Outside");
-    if cnt > 0:
+    if cnt > 0: # because number of dips in finger is not equal to number of fingers, actually one less
         cnt = cnt + 1
-    cv.putText(img, str(cnt), (0, 50), cv.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv.LINE_AA)
+    cv.putText(img, str(cnt), (0, 50), cv.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv.LINE_AA) # put count on image
 
     cv.imwrite("final_result.jpg", img)
     return
