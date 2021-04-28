@@ -5,15 +5,17 @@ from matplotlib import pyplot as plt
 import matplotlib.image as mpimg 
 import numpy as np 
 
-#recognition functions (assume hand is pointing to right w/ thumb pointing down)
-def isOpen(ox1, ox2, ox3, ox4): #detects if a given finger is straight
+#recognition functions (assume hand is pointing to right)
+def isOpen(ox1, ox2, ox3, ox4): #detects if a given finger is open
     if(ox4 > ox3 > ox2 > ox1):
         return True
     else:
         return False 
 
-def thumbOpen(tx1, tx2, tx3, tx4, ty1, ty2, ty3, ty4): #detects if thumb is open
-    if(tx4 > tx3 > tx2 > tx1 and ty1 > ty2 > ty3 > ty4):
+def thumbOpen(tx1, tx2, tx3, tx4, ty1, ty2, ty3, ty4): #detects if thumb is open (need different functions for thumb bc its in different direction than other 4 fingers)
+    if(tx4 > tx3 > tx2 > tx1 and ty1 < ty2 < ty3 < ty4): #if thumb is open and pointing up (knuckle side of hand)
+        return True
+    if(tx4 > tx3 > tx2 > tx1 and ty1 > ty2 > ty3 > ty4): #if thumb is open and pointing down (palm side of hand)
         return True
     else:
         return False 
@@ -23,14 +25,16 @@ def isClosed(cx2, cx3, cx4): #detects if a given finger is closed
         return True
     else:
         return False 
+
+#The functions above only detect if the thumb and fingers are open or closed, more functions needed for different finger positions
             
-z = 'hand_1z.txt' #Z and RGB
+z = 'hand_1z.txt' #importing Z and RGB data
 z = np.loadtxt(z)
 
-mp_drawing = mp.solutions.drawing_utils
+mp_drawing = mp.solutions.drawing_utils #allows for program to draw dots on the hand picture
 mp_hands = mp.solutions.hands 
 
-image = cv2.imread('L hand.png')
+image = cv2.imread('hand_1.png') #imports image of the hand
 
 #For static images:
 with mp_hands.Hands(static_image_mode = True, max_num_hands = 2, min_detection_confidence = 0.5) as hands:
@@ -47,7 +51,7 @@ with mp_hands.Hands(static_image_mode = True, max_num_hands = 2, min_detection_c
     image_height, image_width, _ = image.shape
     annotated_image = image.copy()
 
-    for hand_landmarks in results.multi_hand_landmarks: #printing the hand landmark coordinates
+    for hand_landmarks in results.multi_hand_landmarks: #this is for printing the hand landmark coordinates to test values
         #print('hand_landmarks: ', hand_landmarks)
         #print(f'thumb TIP coordinates: (', f'{hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].x * image_width}, '
         #    f'{hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].y * image_height})')
@@ -64,7 +68,7 @@ with mp_hands.Hands(static_image_mode = True, max_num_hands = 2, min_detection_c
         mp_drawing.draw_landmarks(annotated_image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
     cv2.imwrite('mediaImage.png', cv2.flip(annotated_image, 1))
 
-    # X coordinates
+    # X coordinates with landmarks function
     x_values = np.zeros(21, dtype = float)
     x_values[0] = hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].x * image_width
     x_values[1] = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_CMC].x * image_width
@@ -88,7 +92,7 @@ with mp_hands.Hands(static_image_mode = True, max_num_hands = 2, min_detection_c
     x_values[19] = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_DIP].x * image_width
     x_values[20] = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP].x * image_width
 
-    # Y coordinates
+    # Y coordinates with landmarks function
     y_values = np.zeros(21, dtype = float)
     y_values[0] = hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].y * image_height
     y_values[1] = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_CMC].y * image_height
@@ -112,7 +116,7 @@ with mp_hands.Hands(static_image_mode = True, max_num_hands = 2, min_detection_c
     y_values[19] = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_DIP].y * image_height
     y_values[20] = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP].y * image_height
 
-    #Z coordinates
+    #Z coordinates with finding the point on the picture using X and Y landmarks and using that corresponding Z value form z data matrix
     z_values = np.zeros(21, dtype = float)
     z_values[0] = z[int(y_values[0])][int(x_values[0])]
     z_values[1] = z[int(y_values[1])][int(x_values[1])]
@@ -140,9 +144,11 @@ with mp_hands.Hands(static_image_mode = True, max_num_hands = 2, min_detection_c
 n = 1
 f = 0
 cnt = 0
-Ofingers = np.zeros(5, dtype = int) #[thumb, index, middle, ring, pinky]
-Cfingers = np.zeros(5, dtype = int) #[thumb, index, middle, ring, pinky]
+Ofingers = np.zeros(5, dtype = int) #[thumb, index, middle, ring, pinky] (open fingers array)
+Cfingers = np.zeros(5, dtype = int) #[thumb, index, middle, ring, pinky] (closed fingers array)
 
+#loop goes through each finger and its joints and calls the funcitons at the top of the program to determine the orientation of the finger
+#a 1 in the matrix corresponds to that finger being true for open or closed
 while n < 21:
     if n == 1:
         if(thumbOpen(x_values[n], x_values[n+1], x_values[n+2], x_values[n+3], y_values[n], y_values[n+1], y_values[n+2], y_values[n+3])):
@@ -162,6 +168,10 @@ while n < 21:
 #HAND DETECTION OUTPUTS
 if (Ofingers[0] and Ofingers[1] and Ofingers[2] and Ofingers[3] and Ofingers[4]): #number 5
     cnt = 5
+if (Cfingers[0] and Ofingers[1] and Ofingers[2] and Ofingers[3] and Ofingers[4]): #number 4
+    cnt = 4
+if (Cfingers[0] and Ofingers[1] and Ofingers[2] and Ofingers[3] and Cfingers[4]): #number 3
+    cnt = 3
 if (Cfingers[0] and Ofingers[1] and Ofingers[2] and Cfingers[3] and Cfingers[4]): #number 2
     cnt = 2
 if (Cfingers[0] and Ofingers[1] and Cfingers[2] and Cfingers[3] and Cfingers[4]): #number 1
@@ -175,10 +185,11 @@ if (Cfingers[0] and Cfingers[1] and Cfingers[2] and Cfingers[3] and Ofingers[4])
 if (Ofingers[0] and Cfingers[1] and Cfingers[2] and Cfingers[3] and Ofingers[4]): #letter Y
     cnt = 'Y'
 
+#prints the output (cnt) onto the image of the hand in the top left corner of the image in red
 cv2.putText(annotated_image, str(cnt), (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
-print('open fingers matrix:', Ofingers)
-print('closed fingers matrix', Cfingers)
-print(cnt)
+print('open fingers matrix:', Ofingers) #prints the open fingers matrix, a 1 corresponds to that finger being open, 0 is not open
+print('closed fingers matrix', Cfingers)#prints the closed fingers matrix, a 1 corresponds to that finger being closed, 0 is not closed
+print(cnt)#prints what the program detected for the position of the hand
 
 #Showing the image
 plt.imshow(annotated_image)
